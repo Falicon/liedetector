@@ -1,0 +1,21 @@
+# Determine how many players (just ask; have each register their button)
+
+# If two players
+  # For a given turn; system will pick on player to be the active player
+  # The system will ask every one to close their eyes.
+  # The system will then ask the active player to open their eyes and press their button (to confirm everyone else's eyes are closed)
+  # The system will then show either red (lie) or green (truth) goal for the current player
+  # The system will then flash the button a set number of times and then tell all players to open their eyes.
+
+  # The system will then ask the active player to say how many times the button flashed.
+  # The system will then ask the non active player if they believe the 'counter' is telling the truth or not
+
+  # If the active player didn't follow the instructions the 'detector' gets the point (ie. told to lie but didn't, told to tell the truth but didn't).
+  # if the 'detector' correctly detects the player's action, the 'detector' gets a point.
+  # if the 'detector' incorrectly guesses the player's action, the 'counter' gets a point.
+
+  # first to X points wins.
+
+# If more than two players
+  # for a given turn; system will pick one player to be the 'liar'
+  
