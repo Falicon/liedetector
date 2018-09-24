@@ -1,34 +1,25 @@
 'use strict';
 
-// =================================================================================
-// App Configuration
-// =================================================================================
-
 const {App} = require('jovo-framework');
 
 const config = {
-    logging: true,
+  logging: true,
 };
 
 const app = new App(config);
 
-
-// =================================================================================
-// App Logic
-// =================================================================================
-
 app.setHandler({
-    'LAUNCH': function() {
-        this.toIntent('HelloWorldIntent');
-    },
+  'LAUNCH': function() {
+    this.toIntent('WelcomeIntent');
+  },
 
-    'HelloWorldIntent': function() {
-        this.ask('Hello World! What\'s your name?', 'Please tell me your name.');
-    },
+  'WelcomeIntent': function() {
+    this.ask('Welcome to Lie Detector! How many players would you like to play with today?', 'How many players are there?');
+  },
 
-    'MyNameIsIntent': function(name) {
-        this.tell('Hey ' + name.value + ', nice to meet you!');
-    },
+  'MyNameIsIntent': function(name) {
+    this.tell('Hey ' + name.value + ', nice to meet you!');
+  },
 });
 
 module.exports.app = app;
