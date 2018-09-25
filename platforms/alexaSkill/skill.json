@@ -21,7 +21,15 @@
 				"endpoint": {
 					"sslCertificateType": "Wildcard",
 					"uri": "https://webhook.jovo.cloud/430fca02-d30a-40c4-8db5-94ffa4619396"
-				}
+				},
+				"interfaces": [
+					{
+						"type": "GADGET_CONTROLLER"
+					},
+					{
+						"type": "GAME_ENGINE"
+					}
+				]
 			}
 		},
 		"manifestVersion": "1.0"
