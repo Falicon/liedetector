@@ -2,7 +2,7 @@
 
 const {App} = require('jovo-framework');
 const config = {
-  logging: true
+  logging: false
 };
 const app = new App(config);
 
@@ -35,7 +35,7 @@ app.setHandler({
       jovo_state.setSessionAttribute('button_count', question_response);
       jovo_state.setSessionAttribute('listen_for', 'player_name');
 
-      jovo_state.ask('Great! Lets get ' + question_response + ' buttons set up! Player one, please press your button.', 'Player one please push your button to register for the game.');
+      jovo_state.ask('Great! Lets get ' + question_response + ' buttons set up for the game! Player one, please press your button.', 'Player one please push your button to register for the game.');
 
     } else if (listen_for == 'set_up') {
       /********************************
@@ -68,7 +68,7 @@ app.setHandler({
 
       } else {
         // ask the next player to register their button
-        speech.addText('Thanks! Player ' + current_count + 1 + ', please press your button.');
+        speech.addText('Thanks! Player ' + (current_count + 1) + ', please press your button.');
 
         jovo_state.alexaSkill().gameEngine().respond(speech);
 
@@ -82,57 +82,32 @@ app.setHandler({
       flash_answer = parseInt(question_response);
       jovo_state.setSessionAttribute('flash_answer', flash_answer);
 
-      // check if the current player followed instructions (either lied or told the truth properly)
-      let followed_instructions = false;
-      if (telling == 'tell the truth' && flash_answer == flash_count) {
-        followed_instructions = true;
-      } else if (telling == 'lie' && flash_answer != flash_count) {
-        followed_instructions = true;
+      // determine if they were telling the truth or not
+      telling = 'tell the truth';
+      if (flash_answer != flash_count) {
+        telling = 'lie';
       }
+      jovo_state.setSessionAttribute('telling', telling);
 
-      // if they didn't follow instructions, the automatically lose this round!
-      if (!followed_instructions) {
-        // didn't follow instructions; automatically lose this round!
+      // tell everyone to open their eyes
+      speech.addText('Everyone please open your eyes.').addBreak('100ms');
 
-        // tell everyone to open their eyes
-        speech.addText('Everyone please open your eyes and look sternly at ' + players[current_player.toString()]['player_name'] + ' as they can\'t seem to follow simple instructions!').addBreak('100ms');
-
-        // award points and reveal results
-        speech.addText('We flashed the button blue ' + flash_count + ' times. They were supposed to ' + telling + ' but didn\'t.').addBreak('100ms');
-        speech.addText('Everyone but ' + players[current_player.toString()]['player_name'] + ' earns one point').addBreak('100ms');
-        for (var i = 0; i < players.length; i++) {
-          if (i != current_player) {
-            players[i.toString()]['points'] += 1;
-          }
-        }
-        jovo_state.setSessionAttribute('players', players);
-
-        // determine if we should continue the game or not (hit round count limit)
-        jovo_state.setSessionAttribute('listen_for', 'continue_round');
-
-        jovo_state.ask(speech, 'Would you like to continue the game?');
-
+      // go around the player list (for everyone but current player; and ask them to push their button and say if they think the current player is lying or telling the truth)
+      speech.addText('We are now going to ask each of you if you think ' + players[current_turn]['player_name'] + ' is lying or telling the truth.');
+      if (current_turn == 0) {
+        // start with player two
+        awaiting_answer_from = 1;
       } else {
-        // tell everyone to open their eyes
-        speech.addText('Everyone please open your eyes.').addBreak('100ms');
-
-        // go around the player list (for everyone but current player; and ask them to push their button and say if they think the current player is lying or telling the truth)
-        speech.addText('We are now going to ask each of you if you think ' + players[current_turn]['player_name'] + ' is lying or telling the truth.');
-        if (current_turn == 0) {
-          // start with player two
-          awaiting_answer_from = 1;
-        } else {
-          // start with player one
-          awaiting_answer_from = 0;
-        }
-        jovo_state.setSessionAttribute('awaiting_answer_from', awaiting_answer_from);
-        jovo_state.setSessionAttribute('listen_for', 'round_answer');
-
-        speech.addText(players[awaiting_answer_from]['player_name'] + ' please press your button and then say either truth or lie.');
-
-        jovo_state.alexaSkill().gameEngine().respond(speech);
-
+        // start with player one
+        awaiting_answer_from = 0;
       }
+      jovo_state.setSessionAttribute('awaiting_answer_from', awaiting_answer_from);
+      jovo_state.setSessionAttribute('active_button', players[awaiting_answer_from]['button_id']);
+      jovo_state.setSessionAttribute('listen_for', 'round_answer');
+
+      speech.addText(players[awaiting_answer_from]['player_name'] + ' please press your button.');
+
+      jovo_state.alexaSkill().gameEngine().respond(speech);
 
     } else if (listen_for == 'round_answer') {
       /********************************
@@ -170,8 +145,9 @@ app.setHandler({
         if (telling == 'lie') {
           player_action = 'lied';
         }
-        speech.addText('Time to reveal that ' + players[current_turn] + ' ' + player_action + '!').addBreak('100ms');
-        speech.addText(incorrect.toString() + ' were incorrect and earned ' + players[current_turn]['player_name'] + ' points, while ' + correct + '. Those who were correct each earned a point!').addBreak('100ms');
+        speech.addText('Correct guesses each earned a point, incorrect guesses each earned ' + players[current_turn]['player_name'] + ' a point!').addBreak('100ms');
+        speech.addText('Time to reveal that ' + players[current_turn]['player_name']).addBreak('100ms');
+        speech.addText(' ' + player_action + '!').addBreak('200ms');
         speech.addText('The scores are now:').addBreak('100ms');
         for (var i = 0; i < players.length; i++) {
           speech.addText(players[i]['player_name'] + ', ' + players[i]['points'] + ' points.').addBreak('100ms');
@@ -190,9 +166,10 @@ app.setHandler({
           awaiting_answer_from++;
         }
         jovo_state.setSessionAttribute('awaiting_answer_from', awaiting_answer_from);
+        jovo_state.setSessionAttribute('active_button', players[awaiting_answer_from]['button_id']);
         jovo_state.setSessionAttribute('listen_for', 'round_answer');
 
-        speech.addText(players[awaiting_answer_from]['player_name'] + ' please press your button and then say either truth or lie.');
+        speech.addText(players[awaiting_answer_from]['player_name'] + ' please press your button.');
 
         jovo_state.alexaSkill().gameEngine().respond(speech);
       }
@@ -214,10 +191,10 @@ app.setHandler({
 
         jovo_state.setSessionAttribute('current_turn', current_turn);
         jovo_state.setSessionAttribute('active_button', players[current_turn]['button_id']);
-        speech.addText('Moving on to the next round. All players, please close your eyes now.');
+        jovo_state.setSessionAttribute('listen_for', 'lie_instructions');
 
         // instruct the current player to open their eyes and register that they are ready for additional instructions
-        jovo_state.setSessionAttribute('listen_for', 'lie_instructions');
+        speech.addText('Moving on to the next round. All players, please close your eyes now.');
         speech.addBreak('300ms').addText(players[current_turn]['player_name'] + ' open your eyes, confirm that all other player eyes are closed, and then push your button.');
 
         jovo_state.alexaSkill().gameEngine().respond(speech);
@@ -266,7 +243,7 @@ app.setHandler({
       DEAL WITH BUTTON TIMEOUT
       ********************************/
       // TODO determine what instructions we should repeat;
-      console.log('timedout event');
+      // console.log('timedout event');
 
     } else if (input_event_name == 'buttonDownEvent') {
       /********************************
@@ -315,7 +292,7 @@ app.setHandler({
           ********************************/
           // we are in game; so this means the user is potentially ready/responding to a game play command
 
-          // make sure the person pressing the button is the current_player
+          // make sure the person pressing the button is the current_turn
           var correct_person = false;
           if (active_button == button_id) {
             correct_person = true;
@@ -331,8 +308,8 @@ app.setHandler({
               LIE INSTRUCTIONS
               ********************************/
               // give the current player with their eyes open instructions on what we want
-              let speech = jovo_state.speechBuilder().addText('We are going to first flash your button either green or red followed by a set of blue flashes that you should count.');
-              speech.addBreak('100ms').addText('If we start with a green flash, you should tell the truth about the number of blue flashes. If we start with a red flash, you should lie about the number of blue flashes you count.');
+              let speech = jovo_state.speechBuilder().addText('We are going to flash your button blue a number of times.');
+              speech.addBreak('100ms').addText('Then we are going to ask you to tell everyone how many blue flashes you saw, and each of the other players will guess if you are telling the truth or lying.');
               speech.addBreak('100ms').addText('Press your button when you are ready for us to start.');
               jovo_state.setSessionAttribute('listen_for', 'start_flash');
               jovo_state.alexaSkill().gameEngine().respond(speech);
@@ -341,34 +318,18 @@ app.setHandler({
               /********************************
               START FLASHING
               ********************************/
-              // randomly determine if we want them to lie or tell the truth here
               jovo_state.setSessionAttribute('listen_for', 'flash_answer');
 
-              let truth_slot = Math.floor(Math.random() * (2 - 0) + 0);
-              let telling = 'tell the truth';
-              let flash_color = '00FF00';
-              if (truth_slot == 1) {
-                telling = 'lie';
-                flash_color = 'FF0000';
-              }
-              jovo_state.setSessionAttribute('telling', telling);
-
-              // randomly determine how many times we want to flash the button
-              let flash_count = Math.floor(Math.random() * (8 - 1) + 1);
+              // randomly determine how many times we want to flash the button (1 to 4 times right now)
+              let flash_count = Math.floor(Math.random() * (5 - 1) + 1);
               jovo_state.setSessionAttribute('flash_count', flash_count);
 
-              console.log('telling ' + telling);
-              console.log('flashing ' + flash_count);
-
-              let sequence = [
-                {'durationMs': 1000, 'color': flash_color, 'blend': true},
-                {'durationMs': 1000, 'color': 'FFFFFF', 'blend': true}
-              ];
+              let sequence = [];
               for (var i = 0; i < flash_count; i++) {
-                sequence.push({'durationMs': 1000, 'color': '0000FF', 'blend': true});
-                sequence.push({'durationMs': 1000, 'color': 'FFFFFF', 'blend': true});
+                sequence.push({'durationMs': 500, 'color': '0000FF', 'blend': false});
+                sequence.push({'durationMs': 500, 'color': '000000', 'blend': false});
               }
-              sequence.push({'durationMs': 1000, 'color': 'FFA500', 'blend': true});
+              sequence.push({'durationMs': 1000, 'color': 'FFA500', 'blend': false});
 
               // flash the button correct truth color, then blue flash_count times
               jovo_state.alexaSkill().gadgetController().setNoneTriggerEvent().setAnimations(
@@ -382,8 +343,8 @@ app.setHandler({
               ).setLight([button_id], 0, []);
 
               // ask the current player to say how many times the button flashed
-              let speech = jovo_state.speechBuilder().addText('When you see the orange light, please say the number of blue flashes you counted. But remember to either lie or tell the truth as you were instructed!');
-              jovo_state.alexaSkill().gameEngine().respond(speech);
+              let speech = jovo_state.speechBuilder().addText('When you see the orange light, please say the number of blue flashes you counted.');
+              jovo_state.ask(speech, 'How many blue flashes did you see?');
 
             } else if (listen_for == 'round_answer') {
               /********************************
@@ -391,6 +352,9 @@ app.setHandler({
               ********************************/
               // set the active button
               jovo_state.setSessionAttribute('active_button', button_id);
+
+              let speech = jovo_state.speechBuilder().addText(players[awaiting_answer_from]['player_name'] + ' did ' + players[current_turn]['player_name'] + ' tell the truth or a lie?');
+              jovo_state.ask(speech, speech);
 
             }
           }
@@ -431,7 +395,7 @@ app.setHandler({
     jovo_state.setSessionAttribute('telling', 'tell the truth');
 
     jovo_state.ask(
-      'Welcome to Lie Detector! This game requires Alexa buttons. Each player should have their own button, so how many players will there be?',
+      'Welcome to Lie Detector! This game requires Alexa buttons. Each player should have their own button. How many players will there be?',
       'How many players do you want to play with?'
     );
   },
