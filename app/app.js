@@ -23,7 +23,11 @@ app.setHandler({
     let players = jovo_state.getSessionAttribute('players');
     let telling = jovo_state.getSessionAttribute('telling');
 
-    let current_count = players.length;
+    let current_count = 0;
+    try {
+      current_count = players.length;
+    } catch (ex) {
+    }
 
     if (listen_for == 'button_count') {
       // We want to start the setup phase, so ask the users to push a button and provide a name;
@@ -137,8 +141,8 @@ app.setHandler({
   },
 
   'END': function() {
-    let jovo_state = this;
-    jovo_state.tell('Thanks for playing!');
+    // let jovo_state = this;
+    // jovo_state.tell('Thanks for playing!');
   },
 
   'LAUNCH': function() {
@@ -159,7 +163,11 @@ app.setHandler({
     let players = jovo_state.getSessionAttribute('players');
     let telling = jovo_state.getSessionAttribute('telling');
 
-    let current_count = players.length;
+    let current_count = 0;
+    try {
+      current_count = players.length;
+    } catch (ex) {
+    }
 
     let input_event = jovo_state.request().getEvents()[0];
     let input_event_name = input_event.name;
@@ -300,24 +308,24 @@ app.setHandler({
     // welcome the user; ask for button count
     let jovo_state = this;
 
+    const buttonDownRecognizer = jovo_state.alexaSkill().gameEngine().getPatternRecognizerBuilder('buttonDownRecognizer').anchorEnd().fuzzy(false).pattern([{'action':'down'}]);
+    const buttonDownEvent = jovo_state.alexaSkill().gameEngine().getEventsBuilder('buttonDownEvent').meets(['buttonDownRecognizer']).reportsMatches().shouldEndInputHandler(false).build();
+    const timeoutEvent = jovo_state.alexaSkill().gameEngine().getEventsBuilder('timeoutEvent').meets(['timed out']).reportsNothing().shouldEndInputHandler(true).build();
+    const proxies = ['btn1', 'btn2', 'btn3', 'btn4'];
+    const timeout = 30000;
+
+    jovo_state.alexaSkill().gameEngine().setEvents([buttonDownEvent, timeoutEvent]).setRecognizers([buttonDownRecognizer]).startInputHandler(timeout, proxies);
+
     jovo_state.setSessionAttribute('active_button', 0);
     jovo_state.setSessionAttribute('awaiting_answer_from', 0);
     jovo_state.setSessionAttribute('button_count', 2);
     jovo_state.setSessionAttribute('current_turn', 0);
-    jovo_state.setSessionAttributes('flash_answer', 0);
-    jovo_state.setSessionAttributes('flash_count', 0);
+    jovo_state.setSessionAttribute('flash_answer', 0);
+    jovo_state.setSessionAttribute('flash_count', 0);
     jovo_state.setSessionAttribute('in_game', false);
     jovo_state.setSessionAttribute('listen_for', 'button_count');
-    jovo_state.setSessionAttributes('players', []);
-    jovo_state.setSessionAttributes('telling', 'tell the truth');
-
-    const buttonDownRecognizer = jovo_state.alexaSkill().gameEngine().getPatternRecognizerBuilder('buttonDownRecognizer').anchorEnd().fuzzy(false).pattern([{'action':'down'}]);
-    const buttonDownEvent = jovo_state.alexaSkill.gameEngine().getEventsBuilder('buttonDownEvent').meets(['buttonDownRecognizer']).reportsMatches().shouldEndInputHandler(false).build();
-    const timeoutEvent = jovo_state.alexaSkill.gameEngine().getEventsBuilder('timeoutEvent').meets(['timed out']).reportsNothing().shouldEndInputHandler(true).build();
-    const proxies = ['btn1', 'btn2', 'btn3', 'btn4'];
-    const timeout = 30000;
-
-    jovo_state.alexaSkill().getEngine().setEvents([buttonDownEvent, timeoutEvent]).setRecognizers([buttonDownRecognizer]).startInputHandler(timeout, proxies);
+    jovo_state.setSessionAttribute('players', []);
+    jovo_state.setSessionAttribute('telling', 'tell the truth');
 
     jovo_state.ask(
       'Welcome to Lie Detector! This game requires Alexa buttons. Each player should have their own button, so how many players will there be?',
