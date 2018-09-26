@@ -14,7 +14,7 @@ app.setHandler({
     let listen_for = jovo_state.getSessionAttribute('listen_for');
 
     if (listen_for == 'button_count') {
-      // ask the users to provide a name and push a button (until all buttons are registered)
+      // ask the users to push a button and provide a name;
       jovo_state.setSessionAttribute('button_count', question_response);
       jovo_state.setSessionAttribute('listen_for', 'player_name');
       jovo_state.alexaSkill().gameEngine().respond('Great! Lets get all ' + question_response + ' buttons set up! Player one, please press your button and then say your name.');
