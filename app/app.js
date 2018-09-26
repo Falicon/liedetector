@@ -2,7 +2,7 @@
 
 const {App} = require('jovo-framework');
 const config = {
-  logging: true
+  logging: false
 };
 const app = new App(config);
 
@@ -281,16 +281,29 @@ app.setHandler({
 
             let truth_slot = Math.floor(Math.random() * (2 - 0) + 0);
             let telling = 'tell the truth';
-            let flash_color = '#00FF00';
+            let flash_color = '00FF00';
             if (truth_slot == 1) {
               telling = 'lie';
-              flash_color = '#FF0000';
+              flash_color = 'FF0000';
             }
             jovo_state.setSessionAttribute('telling', telling);
 
             // randomly determine how many times we want to flash the button
-            let flash_count = Math.floor(Math.random() * (8 - 1) * 1);
+            let flash_count = Math.floor(Math.random() * (8 - 1) + 1);
             jovo_state.setSessionAttribute('flash_count', flash_count);
+
+            console.log('telling ' + telling);
+            console.log('flashing ' + flash_count);
+
+            let sequence = [
+              {'durationMs': 1000, 'color': flash_color, 'blend': true},
+              {'durationMs': 1000, 'color': 'FFFFFF', 'blend': true}
+            ];
+            for (var i = 0; i < flash_count; i++) {
+              sequence.push({'durationMs': 1000, 'color': '0000FF', 'blend': true});
+              sequence.push({'durationMs': 1000, 'color': 'FFFFFF', 'blend': true});
+            }
+            sequence.push({'durationMs': 1000, 'color': 'FFA500', 'blend': true});
 
             // flash the button correct truth color, then blue flash_count times
             jovo_state.alexaSkill().gadgetController().setNoneTriggerEvent().setAnimations(
@@ -298,43 +311,10 @@ app.setHandler({
                 {
                   "repeat": 1,
                   "targetLights":["1"],
-                  "sequence": [
-                    {
-                      "durationMs": 500,
-                      "color": flash_color,
-                      "blend": true
-                    }
-                  ]
-                },
-                {
-                  "repeat": flash_count,
-                  "targetLights":["1"],
-                  "sequence": [
-                    {
-                      "durationMs": 500,
-                      "color": "#0000FF",
-                      "blend": true
-                    },
-                    {
-                      "durationMs": 500,
-                      "color": "#FFFFFF",
-                      "blend": true
-                    }
-                  ]
-                },
-                {
-                  "repeat": 1,
-                  "targetLights":["1"],
-                  "sequence": [
-                    {
-                      "durationMs": 500,
-                      "color": '#FFA500',
-                      "blend": true
-                    }
-                  ]
+                  "sequence": sequence
                 }
               ]
-            ).setLight([players[current_player]['button_id']], 0, []);
+            ).setLight([button_id], 0, []);
 
             // ask the current player to say how many times the button flashed
             let speech = jovo_state.speechBuilder().addText('When you see the orange light, please say the number of blue flashes you counted. But remember to either lie or tell the truth as you were instructed!');
