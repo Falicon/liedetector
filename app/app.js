@@ -23,21 +23,40 @@ app.setHandler({
     let players = jovo_state.getSessionAttribute('players');
     let telling = jovo_state.getSessionAttribute('telling');
 
-    let current_count = 0;
-    try {
-      current_count = players.length;
-    } catch (ex) {
-    }
+    // console.log('----------------------------------');
+    // console.log(active_button);
+    // console.log(awaiting_answer_from);
+    // console.log(button_count);
+    // console.log(current_turn);
+    // console.log(flash_answer);
+    // console.log(flash_count);
+    // console.log(in_game);
+    // console.log(listen_for);
+    // console.log(players);
+    // console.log(telling);
+    // console.log('----------------------------------');
+
+    let current_count = players.length;
 
     if (listen_for == 'button_count') {
+      /********************************
+      GET THE NUMBER OF BUTTONS WE SHOULD SET UP
+      ********************************/
       // We want to start the setup phase, so ask the users to push a button and provide a name;
       jovo_state.setSessionAttribute('button_count', question_response);
       jovo_state.setSessionAttribute('listen_for', 'player_name');
-      jovo_state.ask('Great! Lets get all ' + question_response + ' buttons set up! Player one, please press your button.');
+      jovo_state.ask('Great! Lets get ' + question_response + ' buttons set up! Player one, please press your button.');
 
     } else if (listen_for == 'set_up') {
+      /********************************
+      SET UP EACH BUTTON
+      ********************************/
       // update the player name for the active_button
-      players[active_button.toString()]['player_name'] = question_response;
+      for (var i = 0; i < players.length; i++) {
+        if (players[i]['button_id'] == active_button) {
+          players[i]['player_name'] = question_response;
+        }
+      }
       jovo_state.setSessionAttribute('players', players);
 
       if (current_count == button_count) {
@@ -54,7 +73,7 @@ app.setHandler({
         jovo_state.setSessionAttribute('listen_for', 'lie_instructions');
         speech.addBreak('300ms').addText(players[current_turn.toString()]['player_name'] + ' open your eyes, confirm that all other player eyes are closed, and then push your button.');
 
-        jovo_state.alexaSkill().gameEngine().response(speech);
+        jovo_state.alexaSkill().gameEngine().respond(speech);
 
       } else {
         // ask the next player to register their button
@@ -64,6 +83,9 @@ app.setHandler({
       }
 
     } else if (listen_for == 'flash_answer') {
+      /********************************
+      ANSWER HOW MANY FLASHES WERE COUNTED
+      ********************************/
       // in this situation, question_response should be the count of blue flashes
       flash_answer = parseInt(question_response);
       jovo_state.setSessionAttribute('flash_answer', flash_answer);
@@ -104,7 +126,7 @@ app.setHandler({
         jovo_state.setSessionAttribute('listen_for', 'lie_instructions');
         speech.addBreak('300ms').addText(players[current_turn]['player_name'] + ' open your eyes, confirm that all other player eyes are closed, and then push your button.');
 
-        jovo_state.alexaSkill().gameEngine().response(speech);
+        jovo_state.alexaSkill().gameEngine().respond(speech);
 
       } else {
         // tell everyone to open their eyes
@@ -124,11 +146,14 @@ app.setHandler({
 
         speech.addText(players[awaiting_answer_from.toString()]['player_name'] + ' please press your button and then say either truth or lie.');
 
-        jovo_state.alexaSkill().gameEngine().response(speech);
+        jovo_state.alexaSkill().gameEngine().respond(speech);
 
       }
 
     } else if (listen_for == 'round_answer') {
+      /********************************
+      TAKE AN ANSWER FROM A GIVEN USER
+      ********************************/
       // question_response should either be truth or lie
       // TODO determine if this player gets points or not;
       // TODO determine if we are ready to move the next round or not
@@ -163,19 +188,35 @@ app.setHandler({
     let players = jovo_state.getSessionAttribute('players');
     let telling = jovo_state.getSessionAttribute('telling');
 
-    let current_count = 0;
-    try {
-      current_count = players.length;
-    } catch (ex) {
-    }
+    // console.log('----------------------------------');
+    // console.log(active_button);
+    // console.log(awaiting_answer_from);
+    // console.log(button_count);
+    // console.log(current_turn);
+    // console.log(flash_answer);
+    // console.log(flash_count);
+    // console.log(in_game);
+    // console.log(listen_for);
+    // console.log(players);
+    // console.log(telling);
+    // console.log('----------------------------------');
+
+    let current_count = players.length;
 
     let input_event = jovo_state.request().getEvents()[0];
     let input_event_name = input_event.name;
 
     if (input_event_name == 'timeoutEvent') {
-      // TODO button timed out
+      /********************************
+      DEAL WITH BUTTON TIMEOUT
+      ********************************/
+      // TODO determine what instructions we should repeat;
+      console.log('timedout event');
 
     } else if (input_event_name == 'buttonDownEvent') {
+      /********************************
+      DEAL WITH BUTTON CLICK
+      ********************************/
       // user pushed a button; so register it (if need be)
       let button_id = input_event.inputEvents[0].gadgetId;
       let known_button = false;
@@ -187,39 +228,54 @@ app.setHandler({
       }
 
       if (!known_button) {
+        /********************************
+        UNKNOWN BUTTON - ATTEMPT TO REGISTER
+        ********************************/
         // seems to be the first time we are seeing this button; let's try to set it up
         // assign this button to this user
         current_count += 1;
-        players[current_count.toString()] = {
+        players.push({
           'player_id': current_count,
           'button_id': button_id,
           'player_name': 'Player ' + current_count,
           'request_id': jovo_state.request.id,
           'points': 0
-        };
+        });
 
         // save the updated player details to our session
         jovo_state.setSessionAttribute('players', players);
-        jovo_state.setSessionAttribute('active_button', current_count);
+        jovo_state.setSessionAttribute('active_button', button_id);
         jovo_state.setSessionAttribute('listen_for', 'set_up');
 
         // ask the user what name they want to use for this game
         jovo_state.ask('And what name would you like to play as?', 'What should we call you?');
 
       } else {
+        /********************************
+        KNOWN BUTTON
+        ********************************/
         if (in_game) {
+          /********************************
+          IN GAME
+          ********************************/
           // we are in game; so this means the user is potentially ready/responding to a game play command
           // TODO make sure the person pressing the button is the current_player
 
           if (listen_for == 'lie_instructions') {
+            /********************************
+            LIE INSTRUCTIONS
+            ********************************/
             // give the current player with their eyes open instructions on what we want
             let speech = jovo_state.speechBuilder().addText('We are going to first flash your button either green or red followed by a set of blue flashes that you should count.');
             speech.addBreak('100ms').addText('If we start with a green flash, you should tell the truth about the number of blue flashes. If we start with a red flash, you should lie about the number of blue flashes you count.');
             speech.addBreak('100ms').addText('Press your button when you are ready for us to start.');
             jovo_state.setSessionAttribute('listen_for', 'start_flash');
-            jovo_state.alexaSkill().gameEngine().response(speech);
+            jovo_state.alexaSkill().gameEngine().respond(speech);
 
           } else if (listen_for == 'start_flash') {
+            /********************************
+            START FLASHING
+            ********************************/
             // randomly determine if we want them to lie or tell the truth here
             jovo_state.setSessionAttribute('listen_for', 'flash_answer');
 
@@ -282,15 +338,14 @@ app.setHandler({
 
             // ask the current player to say how many times the button flashed
             let speech = jovo_state.speechBuilder().addText('When you see the orange light, please say the number of blue flashes you counted. But remember to either lie or tell the truth as you were instructed!');
-            jovo_state.alexaSkill().gameEngine().response(speech);
+            jovo_state.alexaSkill().gameEngine().respond(speech);
 
           } else if (listen_for == 'round_answer') {
+            /********************************
+            ROUND ANSWER - SET THE ACTIVE BUTTON
+            ********************************/
             // set the active button
-            for (var i = 0; i < players.length; i++) {
-              if (players[i.toString()]['button_id'] == button_id) {
-                jovo_state.setSessionAttribute('active_button', i);
-              }
-            }
+            jovo_state.setSessionAttribute('active_button', button_id);
 
           }
 
@@ -312,11 +367,11 @@ app.setHandler({
     const buttonDownEvent = jovo_state.alexaSkill().gameEngine().getEventsBuilder('buttonDownEvent').meets(['buttonDownRecognizer']).reportsMatches().shouldEndInputHandler(false).build();
     const timeoutEvent = jovo_state.alexaSkill().gameEngine().getEventsBuilder('timeoutEvent').meets(['timed out']).reportsNothing().shouldEndInputHandler(true).build();
     const proxies = ['btn1', 'btn2', 'btn3', 'btn4'];
-    const timeout = 30000;
+    const timeout = 90000;
 
     jovo_state.alexaSkill().gameEngine().setEvents([buttonDownEvent, timeoutEvent]).setRecognizers([buttonDownRecognizer]).startInputHandler(timeout, proxies);
 
-    jovo_state.setSessionAttribute('active_button', 0);
+    jovo_state.setSessionAttribute('active_button', '');
     jovo_state.setSessionAttribute('awaiting_answer_from', 0);
     jovo_state.setSessionAttribute('button_count', 2);
     jovo_state.setSessionAttribute('current_turn', 0);
