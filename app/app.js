@@ -2,7 +2,7 @@
 
 const {App} = require('jovo-framework');
 const config = {
-  logging: true,
+  logging: false,
   intentMap: {
     'AMAZON.FallbackIntent': 'AnswerIntent',
     'AMAZON.CancelIntent': 'END',
@@ -250,7 +250,7 @@ app.setHandler({
         speech.addText('Thanks! Player ' + (current_count + 1) + ', please press your button.');
 
         // enable the next input handler
-        let pattern = {'action':'down', 'gadgetIds':[players[current_count + 1]['button_id']]};
+        let pattern = {'action':'down'};
         let buttonDownRecognizer = jovo_state.alexaSkill().gameEngine().getPatternRecognizerBuilder('buttonDownRecognizer').anchorEnd().fuzzy(false).pattern([pattern]);
         let buttonDownEvent = jovo_state.alexaSkill().gameEngine().getEventsBuilder('buttonDownEvent').meets(['buttonDownRecognizer']).reportsMatches().shouldEndInputHandler(true).build();
         jovo_state.alexaSkill().gameEngine().setEvents([buttonDownEvent]).setRecognizers([buttonDownRecognizer]).startInputHandler(timeout);
@@ -328,6 +328,7 @@ app.setHandler({
     let telling = jovo_state.getSessionAttribute('telling');
 
     let current_count = players.length;
+    let timeout = 90000;
 
     let input_event = jovo_state.request().getEvents()[0];
     let input_event_name = input_event.name;
@@ -403,6 +404,11 @@ app.setHandler({
               speech.addBreak('100ms').addText('Press your button when you are ready for us to start.');
               jovo_state.setSessionAttribute('listen_for', 'start_flash');
 
+              // enable just the current_turn input handler
+              let pattern = {'action':'down', 'gadgetIds':[players[current_turn]['button_id']]};
+              let buttonDownRecognizer = jovo_state.alexaSkill().gameEngine().getPatternRecognizerBuilder('buttonDownRecognizer').anchorEnd().fuzzy(false).pattern([pattern]);
+              let buttonDownEvent = jovo_state.alexaSkill().gameEngine().getEventsBuilder('buttonDownEvent').meets(['buttonDownRecognizer']).reportsMatches().shouldEndInputHandler(true).build();
+              jovo_state.alexaSkill().gameEngine().setEvents([buttonDownEvent]).setRecognizers([buttonDownRecognizer]).startInputHandler(timeout);
               jovo_state.alexaSkill().gameEngine().respond(speech);
 
             } else if (listen_for == 'round_answer') {
