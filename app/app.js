@@ -155,6 +155,22 @@ app.setHandler({
       }
       answers.push(rec);
 
+      // randomly decide if we want to comment on the answer this user gave (about 10% of the time)
+      let comment_on_name_choice = Math.floor(Math.random() * (10 - 0) + 0);
+      if (comment_on_name_choice == 0) {
+        // pick from the list of comments
+        let insults = [
+          players[awaiting_answer_from]['player_name'] + ', of course you think that!',
+          'Ha. Figures!',
+          'You don\'t seem so sure, but OK.',
+          question_response + '! Really? ' + question_response + '. OK, if you say so.',
+          'That\'s clearly a complete guess! But OK.',
+        ];
+        let insult_slot = Math.floor(Math.random() * [insults.length - 0] + 0);
+
+        speech.addText(insults[insult_slot]).addBreak('100ms');
+      }
+
       // determine if we are ready to move the next round or not
       if (answers.length == (players.length - 1)) {
         // ready to award points and move to the next round
@@ -221,10 +237,26 @@ app.setHandler({
       }
       jovo_state.setSessionAttribute('players', players);
 
+      // randomly decide to comment on the name chosen (25% chance)
+      let comment_on_name_choice = Math.floor(Math.random() * (4 - 0) + 0);
+      if (comment_on_name_choice == 0) {
+        // pick from the list of comments
+        let insults = [
+          question_response + '! Ha, that\'s a funny choice. But OK.',
+          'Seriously? ' + question_response + ' is what you want to go with? OK. I guess it\'s your choice.',
+          'Of course you would pick ' + question_response + '.',
+          'OK, but I don\'t think anyone has ever won this game calling themselves, ' + question_response + '.',
+          'Going with something goofey, got it.',
+        ];
+        let insult_slot = Math.floor(Math.random() * [insults.length - 0] + 0);
+
+        speech.addText(insults[insult_slot]).addBreak('100ms');
+      }
+
       if (current_count == button_count) {
         // ready to start the game!
         jovo_state.setSessionAttribute('in_game', true);
-        speech.addText('Great! We are ready to start the game!');
+        speech.addText('OK. It looks like we are ready to start the game!');
 
         // randomly pick which player we want to have the turn
         let current_turn = Math.floor(Math.random() * (players.length - 0) + 0);
@@ -247,7 +279,7 @@ app.setHandler({
 
       } else {
         // ask the next player to register their button
-        speech.addText('Thanks! Player ' + (current_count + 1) + ', please press your button.');
+        speech.addText('Player ' + (current_count + 1) + ', please press your button.');
 
         // enable the next input handler
         let pattern = {'action':'down'};
@@ -267,7 +299,7 @@ app.setHandler({
   ****************************************/
   'END': function() {
     let jovo_state = this;
-    jovo_state.tell('Thanks for playing!');
+    jovo_state.tell('Thanks for playing, lie detector!');
   },
 
   /****************************************
@@ -287,18 +319,30 @@ app.setHandler({
     speech.addBreak('100ms').addText('We\'ll then ask all players to open their eyes and each give a guess to if the counter was telling the thruth or lying.');
     speech.addText('Correct guesses will earn the guesser one point. Each incorrect guess will earn the counter a point.');
 
-    // TODO determine what to prompt, and reprompt the user with at the end of help
     if (listen_for == 'button_count') {
-    } else if (listen_for == 'continue_round') {
-    } else if (listen_for == 'flash_answer') {
-    } else if (listen_for == 'lie_instructions') {
-    } else if (listen_for == 'round_answer') {
-    } else if (listen_for == 'set_up') {
-    } else if (listen_for == 'start_flash') {
-    }
-    reprompt.addText('What should we do next?');
+      speech.addBreak('100ms').addText('How many players do you want to play with?');
+      reprompt.addText('How many players will there be?');
+      jovo_state.ask(speech, reprompt);
 
-    jovo_state.ask(speech, reprompot);
+    } else if (listen_for == 'set_up') {
+      speech.addBreak('100ms').addText('Please press a button to register it with the game.');
+
+      // enable the next input handler
+      let pattern = {'action':'down'};
+      let buttonDownRecognizer = jovo_state.alexaSkill().gameEngine().getPatternRecognizerBuilder('buttonDownRecognizer').anchorEnd().fuzzy(false).pattern([pattern]);
+      let buttonDownEvent = jovo_state.alexaSkill().gameEngine().getEventsBuilder('buttonDownEvent').meets(['buttonDownRecognizer']).reportsMatches().shouldEndInputHandler(true).build();
+      jovo_state.alexaSkill().gameEngine().setEvents([buttonDownEvent]).setRecognizers([buttonDownRecognizer]).startInputHandler(timeout);
+      jovo_state.alexaSkill().gameEngine().respond(speech);
+
+    } else {
+      // ask about starting a new round
+      speech.addBreak('100ms').addText('Do you want to start a new round?');
+      reprompt.addText('Do you want to play the game?');
+
+      jovo_state.setSessionAttribute('listen_for', 'continue_round');
+      jovo_state.ask(speech, reprompt);
+    }
+
 
   },
 
