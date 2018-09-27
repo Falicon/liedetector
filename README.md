@@ -1,20 +1,30 @@
-[![Jovo Framework](https://www.jovo.tech/img/github-logo.png)](https://www.jovo.tech)
+# Alexa Buttons Game: Lie Detector
 
-<p align="center">Templates for the <a href="https://github.com/jovotech/jovo-framework-nodejs">Jovo Framework</a> ⭐️</p>
+Lie Detector is a simple game you play with your friends and Alexa Buttons.
 
-<p align="center">
-<a href="https://www.jovo.tech/framework/docs/"><strong>Documentation</strong></a> -
-<a href="https://github.com/jovotech/jovo-cli"><strong>CLI </strong></a> - <a href="https://github.com/jovotech/jovo-framework-nodejs/blob/master/CONTRIBUTING.md"><strong>Contributing</strong></a> - <a href="https://twitter.com/jovotech"><strong>Twitter</strong></a></p>
-<br/>
+Each round, one player will be picked to be the counter. All other players will close their eyes.
 
-# Template: Hello World
+The alexa will then flash the counter's button yellow a random number of times and ask them to say the number they counted.
 
-Jovo Sample Voice App with a simple "Hello World!" + asking for the user's name. This is the default template for the `jovo new` command:
+The counter can choose to say the real number, the truth, or they can choose to say a different number, a lie.
 
-```sh
-$ jovo new <directory>
+Alexa will then ask all players to open their eyes and each give a guess to if the counter was telling the thruth or lying.
 
-## Alternative
-$ jovo new <directory> --template helloworld
+Correct guesses will earn the guesser one point. Each incorrect guess will earn the counter a point.
+
+## Running the code
+
+You can either run the code local
+
 ```
+jovo run
+```
+
+Or you can zip this repo and upload it to an AWS Lambda with an Alexa Skills Trigger.
+
+You will also need to use the [Amazon Developer Console](http://developer.amazon.com) to define your skill and point it to one of the above options.
+
+## Built with
+
+* [Jovo](https://jovo.tech) - The Framework for Voice App Development
 
