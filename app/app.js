@@ -2,7 +2,7 @@
 
 const {App} = require('jovo-framework');
 const config = {
-  logging: false,
+  logging: true,
   intentMap: {
     'AMAZON.FallbackIntent': 'AnswerIntent',
     'AMAZON.CancelIntent': 'END',
@@ -36,7 +36,7 @@ app.setHandler({
 
     let current_count = players.length;
     let speech = jovo_state.speechBuilder();
-    let timeout = 90000;
+    let timeout = 45000;
 
     if (listen_for == 'button_count') {
       /********************************
@@ -53,7 +53,8 @@ app.setHandler({
         let pattern = {'action':'down'};
         let buttonDownRecognizer = jovo_state.alexaSkill().gameEngine().getPatternRecognizerBuilder('buttonDownRecognizer').anchorEnd().fuzzy(false).pattern([pattern]);
         let buttonDownEvent = jovo_state.alexaSkill().gameEngine().getEventsBuilder('buttonDownEvent').meets(['buttonDownRecognizer']).reportsMatches().shouldEndInputHandler(true).build();
-        jovo_state.alexaSkill().gameEngine().setEvents([buttonDownEvent]).setRecognizers([buttonDownRecognizer]).startInputHandler(timeout);
+        let timeoutEvent = this.alexaSkill().gameEngine().getEventsBuilder('timeoutEvent').meets(['timed out']).reportsNothing().shouldEndInputHandler(true).build();
+        jovo_state.alexaSkill().gameEngine().setEvents([buttonDownEvent, timeoutEvent]).setRecognizers([buttonDownRecognizer]).startInputHandler(timeout);
         jovo_state.alexaSkill().gameEngine().respond('Great! Lets get ' + question_response + ' buttons set up for the game! Player one, please press your button.');
 
       }
@@ -88,7 +89,8 @@ app.setHandler({
         let pattern = {'action':'down', 'gadgetIds':[players[current_turn]['button_id']]};
         let buttonDownRecognizer = jovo_state.alexaSkill().gameEngine().getPatternRecognizerBuilder('buttonDownRecognizer').anchorEnd().fuzzy(false).pattern([pattern]);
         let buttonDownEvent = jovo_state.alexaSkill().gameEngine().getEventsBuilder('buttonDownEvent').meets(['buttonDownRecognizer']).reportsMatches().shouldEndInputHandler(true).build();
-        jovo_state.alexaSkill().gameEngine().setEvents([buttonDownEvent]).setRecognizers([buttonDownRecognizer]).startInputHandler(timeout);
+        let timeoutEvent = this.alexaSkill().gameEngine().getEventsBuilder('timeoutEvent').meets(['timed out']).reportsNothing().shouldEndInputHandler(true).build();
+        jovo_state.alexaSkill().gameEngine().setEvents([buttonDownEvent, timeoutEvent]).setRecognizers([buttonDownRecognizer]).startInputHandler(timeout);
         jovo_state.alexaSkill().gameEngine().respond(speech);
 
       } else {
@@ -134,7 +136,8 @@ app.setHandler({
       let pattern = {'action':'down', 'gadgetIds':[players[awaiting_answer_from]['button_id']]};
       let buttonDownRecognizer = jovo_state.alexaSkill().gameEngine().getPatternRecognizerBuilder('buttonDownRecognizer').anchorEnd().fuzzy(false).pattern([pattern]);
       let buttonDownEvent = jovo_state.alexaSkill().gameEngine().getEventsBuilder('buttonDownEvent').meets(['buttonDownRecognizer']).reportsMatches().shouldEndInputHandler(true).build();
-      jovo_state.alexaSkill().gameEngine().setEvents([buttonDownEvent]).setRecognizers([buttonDownRecognizer]).startInputHandler(timeout);
+      let timeoutEvent = this.alexaSkill().gameEngine().getEventsBuilder('timeoutEvent').meets(['timed out']).reportsNothing().shouldEndInputHandler(true).build();
+      jovo_state.alexaSkill().gameEngine().setEvents([buttonDownEvent, timeoutEvent]).setRecognizers([buttonDownRecognizer]).startInputHandler(timeout);
       jovo_state.alexaSkill().gameEngine().respond(speech);
 
     } else if (listen_for == 'round_answer') {
@@ -221,8 +224,10 @@ app.setHandler({
         let pattern = {'action':'down', 'gadgetIds':[players[awaiting_answer_from]['button_id']]};
         let buttonDownRecognizer = jovo_state.alexaSkill().gameEngine().getPatternRecognizerBuilder('buttonDownRecognizer').anchorEnd().fuzzy(false).pattern([pattern]);
         let buttonDownEvent = jovo_state.alexaSkill().gameEngine().getEventsBuilder('buttonDownEvent').meets(['buttonDownRecognizer']).reportsMatches().shouldEndInputHandler(true).build();
-        jovo_state.alexaSkill().gameEngine().setEvents([buttonDownEvent]).setRecognizers([buttonDownRecognizer]).startInputHandler(timeout);
+        let timeoutEvent = this.alexaSkill().gameEngine().getEventsBuilder('timeoutEvent').meets(['timed out']).reportsNothing().shouldEndInputHandler(true).build();
+        jovo_state.alexaSkill().gameEngine().setEvents([buttonDownEvent, timeoutEvent]).setRecognizers([buttonDownRecognizer]).startInputHandler(timeout);
         jovo_state.alexaSkill().gameEngine().respond(speech);
+
       }
 
     } else if (listen_for == 'set_up') {
@@ -274,7 +279,8 @@ app.setHandler({
         let pattern = {'action':'down', 'gadgetIds':[players[current_turn]['button_id']]};
         let buttonDownRecognizer = jovo_state.alexaSkill().gameEngine().getPatternRecognizerBuilder('buttonDownRecognizer').anchorEnd().fuzzy(false).pattern([pattern]);
         let buttonDownEvent = jovo_state.alexaSkill().gameEngine().getEventsBuilder('buttonDownEvent').meets(['buttonDownRecognizer']).reportsMatches().shouldEndInputHandler(true).build();
-        jovo_state.alexaSkill().gameEngine().setEvents([buttonDownEvent]).setRecognizers([buttonDownRecognizer]).startInputHandler(timeout);
+        let timeoutEvent = this.alexaSkill().gameEngine().getEventsBuilder('timeoutEvent').meets(['timed out']).reportsNothing().shouldEndInputHandler(true).build();
+        jovo_state.alexaSkill().gameEngine().setEvents([buttonDownEvent, timeoutEvent]).setRecognizers([buttonDownRecognizer]).startInputHandler(timeout);
         jovo_state.alexaSkill().gameEngine().respond(speech);
 
       } else {
@@ -285,7 +291,8 @@ app.setHandler({
         let pattern = {'action':'down'};
         let buttonDownRecognizer = jovo_state.alexaSkill().gameEngine().getPatternRecognizerBuilder('buttonDownRecognizer').anchorEnd().fuzzy(false).pattern([pattern]);
         let buttonDownEvent = jovo_state.alexaSkill().gameEngine().getEventsBuilder('buttonDownEvent').meets(['buttonDownRecognizer']).reportsMatches().shouldEndInputHandler(true).build();
-        jovo_state.alexaSkill().gameEngine().setEvents([buttonDownEvent]).setRecognizers([buttonDownRecognizer]).startInputHandler(timeout);
+        let timeoutEvent = this.alexaSkill().gameEngine().getEventsBuilder('timeoutEvent').meets(['timed out']).reportsNothing().shouldEndInputHandler(true).build();
+        jovo_state.alexaSkill().gameEngine().setEvents([buttonDownEvent, timeoutEvent]).setRecognizers([buttonDownRecognizer]).startInputHandler(timeout);
         jovo_state.alexaSkill().gameEngine().respond(speech);
 
       }
@@ -331,7 +338,8 @@ app.setHandler({
       let pattern = {'action':'down'};
       let buttonDownRecognizer = jovo_state.alexaSkill().gameEngine().getPatternRecognizerBuilder('buttonDownRecognizer').anchorEnd().fuzzy(false).pattern([pattern]);
       let buttonDownEvent = jovo_state.alexaSkill().gameEngine().getEventsBuilder('buttonDownEvent').meets(['buttonDownRecognizer']).reportsMatches().shouldEndInputHandler(true).build();
-      jovo_state.alexaSkill().gameEngine().setEvents([buttonDownEvent]).setRecognizers([buttonDownRecognizer]).startInputHandler(timeout);
+      let timeoutEvent = this.alexaSkill().gameEngine().getEventsBuilder('timeoutEvent').meets(['timed out']).reportsNothing().shouldEndInputHandler(true).build();
+      jovo_state.alexaSkill().gameEngine().setEvents([buttonDownEvent, timeoutEvent]).setRecognizers([buttonDownRecognizer]).startInputHandler(timeout);
       jovo_state.alexaSkill().gameEngine().respond(speech);
 
     } else {
@@ -341,8 +349,8 @@ app.setHandler({
 
       jovo_state.setSessionAttribute('listen_for', 'continue_round');
       jovo_state.ask(speech, reprompt);
-    }
 
+    }
 
   },
 
@@ -372,12 +380,73 @@ app.setHandler({
     let telling = jovo_state.getSessionAttribute('telling');
 
     let current_count = players.length;
-    let timeout = 90000;
+    let timeout = 45000;
 
     let input_event = jovo_state.request().getEvents()[0];
     let input_event_name = input_event.name;
 
-    if (input_event_name == 'buttonDownEvent') {
+    if (input_event_name == 'timeoutEvent') {
+      if (listen_for == 'button_count') {
+        // press a button to register
+        let pattern = {'action':'down'};
+        let buttonDownRecognizer = jovo_state.alexaSkill().gameEngine().getPatternRecognizerBuilder('buttonDownRecognizer').anchorEnd().fuzzy(false).pattern([pattern]);
+        let buttonDownEvent = jovo_state.alexaSkill().gameEngine().getEventsBuilder('buttonDownEvent').meets(['buttonDownRecognizer']).reportsMatches().shouldEndInputHandler(true).build();
+        let timeoutEvent = this.alexaSkill().gameEngine().getEventsBuilder('timeoutEvent').meets(['timed out']).reportsNothing().shouldEndInputHandler(true).build();
+        jovo_state.alexaSkill().gameEngine().setEvents([buttonDownEvent, timeoutEvent]).setRecognizers([buttonDownRecognizer]).startInputHandler(timeout);
+        jovo_state.alexaSkill().gameEngine().respond('This game requires at least two buttons. Please push a button to register it with this game.');
+
+      } else if (listen_for == 'continue_round') {
+        // press button to confirm eyes are closed
+        let pattern = {'action':'down', 'gadgetIds':[players[current_turn]['button_id']]};
+        let buttonDownRecognizer = jovo_state.alexaSkill().gameEngine().getPatternRecognizerBuilder('buttonDownRecognizer').anchorEnd().fuzzy(false).pattern([pattern]);
+        let buttonDownEvent = jovo_state.alexaSkill().gameEngine().getEventsBuilder('buttonDownEvent').meets(['buttonDownRecognizer']).reportsMatches().shouldEndInputHandler(true).build();
+        let timeoutEvent = this.alexaSkill().gameEngine().getEventsBuilder('timeoutEvent').meets(['timed out']).reportsNothing().shouldEndInputHandler(true).build();
+        jovo_state.alexaSkill().gameEngine().setEvents([buttonDownEvent, timeoutEvent]).setRecognizers([buttonDownRecognizer]).startInputHandler(timeout);
+        jovo_state.alexaSkill().gameEngine().respond(players[current_turn]['player_name'] + ', please push your button to confirm that all player eyes are closed and start the flashing sequence.');
+
+      } else if (listen_for == 'lie_instructions') {
+        // confirm eyes are closed
+        let pattern = {'action':'down', 'gadgetIds':[players[current_turn]['button_id']]};
+        let buttonDownRecognizer = jovo_state.alexaSkill().gameEngine().getPatternRecognizerBuilder('buttonDownRecognizer').anchorEnd().fuzzy(false).pattern([pattern]);
+        let buttonDownEvent = jovo_state.alexaSkill().gameEngine().getEventsBuilder('buttonDownEvent').meets(['buttonDownRecognizer']).reportsMatches().shouldEndInputHandler(true).build();
+        let timeoutEvent = this.alexaSkill().gameEngine().getEventsBuilder('timeoutEvent').meets(['timed out']).reportsNothing().shouldEndInputHandler(true).build();
+        jovo_state.alexaSkill().gameEngine().setEvents([buttonDownEvent, timeoutEvent]).setRecognizers([buttonDownRecognizer]).startInputHandler(timeout);
+        jovo_state.alexaSkill().gameEngine().respond(players[current_turn]['player_name'] + ', please push your button to confirm that all player eyes are closed and start the flashing sequence.');
+
+      } else if (listen_for == 'round_answer') {
+        // awaiting_answer_from push button to respond
+        let pattern = {'action':'down', 'gadgetIds':[players[awaiting_answer_from]['button_id']]};
+        let buttonDownRecognizer = jovo_state.alexaSkill().gameEngine().getPatternRecognizerBuilder('buttonDownRecognizer').anchorEnd().fuzzy(false).pattern([pattern]);
+        let buttonDownEvent = jovo_state.alexaSkill().gameEngine().getEventsBuilder('buttonDownEvent').meets(['buttonDownRecognizer']).reportsMatches().shouldEndInputHandler(true).build();
+        let timeoutEvent = this.alexaSkill().gameEngine().getEventsBuilder('timeoutEvent').meets(['timed out']).reportsNothing().shouldEndInputHandler(true).build();
+        jovo_state.alexaSkill().gameEngine().setEvents([buttonDownEvent, timeoutEvent]).setRecognizers([buttonDownRecognizer]).startInputHandler(timeout);
+        jovo_state.alexaSkill().gameEngine().respond(players[awaiting_answer_from]['player_name'] + ', please push your button.');
+
+      } else if (listen_for == 'set_up') {
+        // push button to register
+        let pattern = {'action':'down'};
+        let buttonDownRecognizer = jovo_state.alexaSkill().gameEngine().getPatternRecognizerBuilder('buttonDownRecognizer').anchorEnd().fuzzy(false).pattern([pattern]);
+        let buttonDownEvent = jovo_state.alexaSkill().gameEngine().getEventsBuilder('buttonDownEvent').meets(['buttonDownRecognizer']).reportsMatches().shouldEndInputHandler(true).build();
+        let timeoutEvent = this.alexaSkill().gameEngine().getEventsBuilder('timeoutEvent').meets(['timed out']).reportsNothing().shouldEndInputHandler(true).build();
+        jovo_state.alexaSkill().gameEngine().setEvents([buttonDownEvent, timeoutEvent]).setRecognizers([buttonDownRecognizer]).startInputHandler(timeout);
+        jovo_state.alexaSkill().gameEngine().respond('This game requires at least two buttons. Please push another button to register it with this game.');
+
+      } else if (listen_for == 'start_flash') {
+        // push button to start flash
+        let pattern = {'action':'down', 'gadgetIds':[players[current_turn]['button_id']]};
+        let buttonDownRecognizer = jovo_state.alexaSkill().gameEngine().getPatternRecognizerBuilder('buttonDownRecognizer').anchorEnd().fuzzy(false).pattern([pattern]);
+        let buttonDownEvent = jovo_state.alexaSkill().gameEngine().getEventsBuilder('buttonDownEvent').meets(['buttonDownRecognizer']).reportsMatches().shouldEndInputHandler(true).build();
+        let timeoutEvent = this.alexaSkill().gameEngine().getEventsBuilder('timeoutEvent').meets(['timed out']).reportsNothing().shouldEndInputHandler(true).build();
+        jovo_state.alexaSkill().gameEngine().setEvents([buttonDownEvent, timeoutEvent]).setRecognizers([buttonDownRecognizer]).startInputHandler(timeout);
+        jovo_state.alexaSkill().gameEngine().respond(players[current_turn]['player_name'] + ', please push your button to confirm that all player eyes are closed and start the flashing sequence.');
+
+      } else {
+        // unsure; so just end the game
+        jovo_state.toIntent('END');
+
+      }
+
+    } else if (input_event_name == 'buttonDownEvent') {
       /********************************
       DEAL WITH BUTTON CLICK
       ********************************/
@@ -452,7 +521,8 @@ app.setHandler({
               let pattern = {'action':'down', 'gadgetIds':[players[current_turn]['button_id']]};
               let buttonDownRecognizer = jovo_state.alexaSkill().gameEngine().getPatternRecognizerBuilder('buttonDownRecognizer').anchorEnd().fuzzy(false).pattern([pattern]);
               let buttonDownEvent = jovo_state.alexaSkill().gameEngine().getEventsBuilder('buttonDownEvent').meets(['buttonDownRecognizer']).reportsMatches().shouldEndInputHandler(true).build();
-              jovo_state.alexaSkill().gameEngine().setEvents([buttonDownEvent]).setRecognizers([buttonDownRecognizer]).startInputHandler(timeout);
+              let timeoutEvent = this.alexaSkill().gameEngine().getEventsBuilder('timeoutEvent').meets(['timed out']).reportsNothing().shouldEndInputHandler(true).build();
+              jovo_state.alexaSkill().gameEngine().setEvents([buttonDownEvent, timeoutEvent]).setRecognizers([buttonDownRecognizer]).startInputHandler(timeout);
               jovo_state.alexaSkill().gameEngine().respond(speech);
 
             } else if (listen_for == 'round_answer') {
@@ -500,11 +570,11 @@ app.setHandler({
           let pattern = {'action':'down'};
           let buttonDownRecognizer = jovo_state.alexaSkill().gameEngine().getPatternRecognizerBuilder('buttonDownRecognizer').anchorEnd().fuzzy(false).pattern([pattern]);
           let buttonDownEvent = jovo_state.alexaSkill().gameEngine().getEventsBuilder('buttonDownEvent').meets(['buttonDownRecognizer']).reportsMatches().shouldEndInputHandler(true).build();
-          jovo_state.alexaSkill().gameEngine().setEvents([buttonDownEvent]).setRecognizers([buttonDownRecognizer]).startInputHandler(timeout);
+          let timeoutEvent = this.alexaSkill().gameEngine().getEventsBuilder('timeoutEvent').meets(['timed out']).reportsNothing().shouldEndInputHandler(true).build();
+          jovo_state.alexaSkill().gameEngine().setEvents([buttonDownEvent, timeoutEvent]).setRecognizers([buttonDownRecognizer]).startInputHandler(timeout);
           jovo_state.alexaSkill().gameEngine().respond('That button seems to already be registered, please try one that you haven\'t set up for the game yet.');
 
         }
-
       }
     }
   },
