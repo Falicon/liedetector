@@ -42,6 +42,8 @@ app.setHandler({
       /********************************
       GET THE NUMBER OF BUTTONS WE SHOULD SET UP
       ********************************/
+      // TODO ensure that user gave a number (ideally between 2 and 4)
+
       if (question_response < 2) {
         jovo_state.ask('Sorry. This game requires at least two buttons and two players. How many players would you like to play with?', 'How many players do you have?');
 
@@ -63,6 +65,8 @@ app.setHandler({
       /********************************
       EITHER MOVE TO THE NEXT ROUND OR END THE GAME
       ********************************/
+      // TODO allow for more variations of "do not coninue" besides no
+
       let continue_round = true;
       if (question_response.indexOf('no') > -1) {
         continue_round = false;
@@ -103,6 +107,8 @@ app.setHandler({
       /********************************
       ANSWER HOW MANY FLASHES WERE COUNTED
       ********************************/
+      // TODO ensure that the answer is a number
+
       // in this situation, question_response should be the count of orange flashes
       flash_answer = parseInt(question_response);
       jovo_state.setSessionAttribute('flash_answer', flash_answer);
@@ -144,6 +150,8 @@ app.setHandler({
       /********************************
       TAKE AN ANSWER FROM A GIVEN USER
       ********************************/
+      // TODO allow for more variations of detecting "lie" response
+
       // question_response should either be truth or lie
       let user_answer = 'tell the truth';
       if (question_response.indexOf('lie') > -1 || question_response.indexOf('lying') > -1) {
@@ -234,6 +242,8 @@ app.setHandler({
       /********************************
       SET UP EACH BUTTON
       ********************************/
+      // TODO clean up common phrases that we might want to ignore (like "call me" or "my name is")
+
       // update the player name for the active_button
       for (var i = 0; i < players.length; i++) {
         if (players[i]['button_id'] == active_button) {
