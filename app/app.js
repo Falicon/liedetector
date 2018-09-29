@@ -50,6 +50,7 @@ app.setHandler({
       } else {
         // We want to start the setup phase, so ask the users to push a button and provide a name;
         jovo_state.setSessionAttribute('button_count', question_response);
+        jovo_state.setSessionAttribute('repeat_count', 0);
 
         // start listening for a single button push event
         let pattern = {'action':'down'};
@@ -84,6 +85,7 @@ app.setHandler({
         jovo_state.setSessionAttribute('current_turn', current_turn);
         jovo_state.setSessionAttribute('active_button', players[current_turn]['button_id']);
         jovo_state.setSessionAttribute('listen_for', 'lie_instructions');
+        jovo_state.setSessionAttribute('repeat_count', 0);
 
         // instruct the current player to open their eyes and register that they are ready for additional instructions
         speech.addText('Moving on to the next round. All players, please close your eyes now.');
@@ -135,6 +137,7 @@ app.setHandler({
       jovo_state.setSessionAttribute('awaiting_answer_from', awaiting_answer_from);
       jovo_state.setSessionAttribute('active_button', players[awaiting_answer_from]['button_id']);
       jovo_state.setSessionAttribute('listen_for', 'round_answer');
+      jovo_state.setSessionAttribute('repeat_count', 0);
 
       speech.addText(players[awaiting_answer_from]['player_name'] + ' please press your button.');
 
@@ -225,6 +228,7 @@ app.setHandler({
         jovo_state.setSessionAttribute('awaiting_answer_from', awaiting_answer_from);
         jovo_state.setSessionAttribute('active_button', players[awaiting_answer_from]['button_id']);
         jovo_state.setSessionAttribute('listen_for', 'round_answer');
+        jovo_state.setSessionAttribute('repeat_count', 0);
 
         speech.addText(players[awaiting_answer_from]['player_name'] + ' please press your button.');
 
@@ -279,6 +283,7 @@ app.setHandler({
         jovo_state.setSessionAttribute('current_turn', current_turn);
         jovo_state.setSessionAttribute('active_button', players[current_turn]['button_id']);
         jovo_state.setSessionAttribute('listen_for', 'lie_instructions');
+        jovo_state.setSessionAttribute('repeat_count', 0);
 
         speech.addText('All players, please close your eyes now.');
 
@@ -296,6 +301,7 @@ app.setHandler({
       } else {
         // ask the next player to register their button
         speech.addText('Player ' + (current_count + 1) + ', please press your button.');
+        jovo_state.setSessionAttribute('repeat_count', 0);
 
         // enable the next input handler
         let pattern = {'action':'down'};
@@ -387,6 +393,7 @@ app.setHandler({
     let in_game = jovo_state.getSessionAttribute('in_game');
     let listen_for = jovo_state.getSessionAttribute('listen_for');
     let players = jovo_state.getSessionAttribute('players');
+    let repeat_count = jovo_state.getSessionAttribute('repeat_count');
     let telling = jovo_state.getSessionAttribute('telling');
 
     let current_count = players.length;
@@ -395,8 +402,20 @@ app.setHandler({
     let input_event = jovo_state.request().getEvents()[0];
     let input_event_name = input_event.name;
 
+    // if for some reason, we don't have repeat_count set; make sure it gets set now
+    if (repeat_count === undefined) {
+      repeat_count = 0;
+      jovo_state.setSessionAttribute('repeat_count', repeat_count);
+    }
+
     if (input_event_name == 'timeoutEvent') {
-      if (listen_for == 'button_count') {
+      repeat_count++;
+      jovo_state.setSessionAttribute('repeat_count', repeat_count);
+      if (repeat_count > 2) {
+        // we've repeated ourselves enough; let's just end the game
+        jovo_state.toIntent('END');
+
+      } else if (listen_for == 'button_count') {
         // press a button to register
         let pattern = {'action':'down'};
         let buttonDownRecognizer = jovo_state.alexaSkill().gameEngine().getPatternRecognizerBuilder('buttonDownRecognizer').anchorEnd().fuzzy(false).pattern([pattern]);
@@ -607,6 +626,7 @@ app.setHandler({
     jovo_state.setSessionAttribute('in_game', false);
     jovo_state.setSessionAttribute('listen_for', 'button_count');
     jovo_state.setSessionAttribute('players', []);
+    jovo_state.setSessionAttribute('repeat_count', 0);
     jovo_state.setSessionAttribute('telling', 'tell the truth');
 
     jovo_state.ask(
